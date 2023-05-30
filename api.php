@@ -3,10 +3,11 @@
 // 加载历史事件数据
 $events = json_decode(file_get_contents('history_in_today.json'), true);
 
-// 获取请求参数中的类型、月份和日期
+// 获取请求参数中的类型、月份、日期和关键词
 $type = $_GET['type'] ?? null;
 $month = $_GET['month'] ?? null;
 $day = $_GET['day'] ?? null;
+$keyword = $_GET['keyword'] ?? null;
 
 // 获取分页参数中的每页返回事件数量和页码
 $page_size = $_GET['page_size'] ?? 20;
@@ -28,6 +29,16 @@ if ($day !== null) {
         return $event['day'] == $day;
     });
 }
+if ($keyword !== null) {
+    $events = array_filter($events, function($event) use ($keyword) {
+        return stripos($event['data'], $keyword) !== false;
+    });
+}
+
+// 按照年份对历史事件列表进行排序
+usort($events, function($a, $b) {
+    return $a['year'] - $b['year'];
+});
 
 // 对历史事件列表进行分页处理
 $total = count($events);
